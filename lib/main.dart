@@ -104,7 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
           icon: const Icon(Icons.add),
         ),
       ],
-      title: const Text('Despesas Pessoais'),
+      title: const Text(
+        'Despesas Pessoais',
+      ),
     );
 
     final availableHight = MediaQuery.of(context).size.height -
@@ -118,11 +120,11 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(
-              height: availableHight * 0.3,
+              height: availableHight * 0.30,
               child: Chart(_recentTransactions),
             ),
             SizedBox(
-              height: availableHight * 0.7,
+              height: availableHight * 0.70,
               child: TransactionList(_transactions, _removeTransaction),
             ),
           ],
