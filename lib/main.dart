@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:expenses/components/chart.dart';
 import 'package:flutter/material.dart';
 
+import 'components/chart.dart';
 import 'components/transaction_form.dart';
 import 'components/transaction_list.dart';
 import 'models/transaction.dart';
@@ -54,6 +54,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _transactions = [];
+  bool _showChart = false;
 
   List<Transaction> get _recentTransactions {
     return _transactions.where((tr) {
@@ -97,16 +98,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isLandsCape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     final appBar = AppBar(
+      title: const Text(
+        'Despesas Pessoais',
+      ),
       actions: [
+        if (isLandsCape)
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _showChart = !_showChart;
+              });
+            },
+            icon: Icon(_showChart ? Icons.auto_graph : Icons.list_alt_sharp),
+          ),
         IconButton(
           onPressed: () => _openTransactionFormModal(context),
           icon: const Icon(Icons.add),
         ),
       ],
-      title: const Text(
-        'Despesas Pessoais',
-      ),
     );
 
     final availableHight = MediaQuery.of(context).size.height -
@@ -119,14 +132,16 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(
-              height: availableHight * 0.30,
-              child: Chart(_recentTransactions),
-            ),
-            SizedBox(
-              height: availableHight * 0.70,
-              child: TransactionList(_transactions, _removeTransaction),
-            ),
+            if (_showChart || !isLandsCape)
+              SizedBox(
+                height: availableHight * (isLandsCape ? 0.7 : 0.30),
+                child: Chart(_recentTransactions),
+              ),
+            if (!_showChart || isLandsCape)
+              SizedBox(
+                height: availableHight * (isLandsCape ? 1 : 0.7),
+                child: TransactionList(_transactions, _removeTransaction),
+              ),
           ],
         ),
       ),
