@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'components/chart.dart';
@@ -7,22 +9,21 @@ import 'components/transaction_form.dart';
 import 'components/transaction_list.dart';
 import 'models/transaction.dart';
 
-main() => runApp(const ExpensesApp());
+main() => runApp(ExpensesApp());
 
 class ExpensesApp extends StatelessWidget {
-  const ExpensesApp({Key? key}) : super(key: key);
+  ExpensesApp({Key? key}) : super(key: key);
+  final ThemeData tema = ThemeData();
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData tema = ThemeData();
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: const MyHomePage(),
       theme: tema.copyWith(
         colorScheme: tema.colorScheme.copyWith(
           primary: Colors.purple.shade900,
-          secondary: Colors.amberAccent,
+          secondary: Colors.amber,
         ),
         textTheme: tema.textTheme.copyWith(
           headline6: const TextStyle(
@@ -31,8 +32,10 @@ class ExpensesApp extends StatelessWidget {
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
-          button:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          button: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         appBarTheme: const AppBarTheme(
             titleTextStyle: TextStyle(
@@ -96,60 +99,95 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget _getIconButton(IconData icon, Function() fn) {
+    return Platform.isMacOS
+        ? GestureDetector(onTap: fn, child: Icon(icon))
+        : IconButton(icon: Icon(icon), onPressed: fn);
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isLandsCape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    final mediaQuery = MediaQuery.of(context);
+    bool isLandsCape = mediaQuery.orientation == Orientation.landscape;
 
-    final appBar = AppBar(
-      title: const Text(
-        'Despesas Pessoais',
+    final actions = [
+      if (isLandsCape)
+        _getIconButton(_showChart ? Icons.list_alt_sharp : Icons.auto_graph,
+            () {
+          setState(() {
+            _showChart = !_showChart;
+          });
+        }),
+      _getIconButton(
+        Platform.isMacOS ? CupertinoIcons.add : Icons.add,
+        () => _openTransactionFormModal(context),
       ),
-      actions: [
-        if (isLandsCape)
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showChart = !_showChart;
-              });
-            },
-            icon: Icon(_showChart ? Icons.auto_graph : Icons.list_alt_sharp),
-          ),
-        IconButton(
-          onPressed: () => _openTransactionFormModal(context),
-          icon: const Icon(Icons.add),
-        ),
-      ],
+    ];
+
+    final PreferredSizeWidget appBar = AppBar(
+      actions: actions,
+      title: const Text('Despesas Pessoais'),
     );
 
-    final availableHight = MediaQuery.of(context).size.height -
+    final availableHight = mediaQuery.size.height -
         appBar.preferredSize.height -
-        MediaQuery.of(context).padding.top;
+        mediaQuery.padding.top;
 
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_showChart || !isLandsCape)
-              SizedBox(
-                height: availableHight * (isLandsCape ? 0.7 : 0.30),
-                child: Chart(_recentTransactions),
-              ),
-            if (!_showChart || isLandsCape)
-              SizedBox(
-                height: availableHight * (isLandsCape ? 1 : 0.7),
-                child: TransactionList(_transactions, _removeTransaction),
-              ),
-          ],
-        ),
+    final bodyPage = SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // if (isLandsCape)
+          //   Row(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       const Text('Exibir Gráfico'),
+          //       Switch.adaptive(
+          //         activeColor: Theme.of(context).colorScheme.secondary,
+          //         value: _showChart,
+          //         onChanged: (value) {
+          //           setState(() {
+          //             _showChart = value;
+          //           });
+          //         },
+          //       ),
+          //     ],
+          //   ),
+          if (_showChart || !isLandsCape)
+            SizedBox(
+              height: availableHight * (isLandsCape ? 0.8 : 0.30),
+              child: Chart(_recentTransactions),
+            ),
+          if (!_showChart || isLandsCape)
+            SizedBox(
+              height: availableHight * (isLandsCape ? 1 : 0.7),
+              child: TransactionList(_transactions, _removeTransaction),
+            ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openTransactionFormModal(context),
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+
+    return Platform.isMacOS
+        ? CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: const Text('Despesas Pessoais'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+              ),
+            ),
+            child: bodyPage,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: bodyPage,
+            floatingActionButton: Platform.isMacOS
+                ? Container()
+                : FloatingActionButton(
+                    onPressed: () => _openTransactionFormModal(context),
+                    child: const Icon(Icons.add),
+                  ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+          );
   }
 }
