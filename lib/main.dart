@@ -110,10 +110,14 @@ class _MyHomePageState extends State<MyHomePage> {
     final mediaQuery = MediaQuery.of(context);
     bool isLandsCape = mediaQuery.orientation == Orientation.landscape;
 
-    final actions = [
+    final iconList =
+        Platform.isMacOS ? CupertinoIcons.graph_square : Icons.list_alt;
+    final chartList =
+        Platform.isMacOS ? CupertinoIcons.graph_square : Icons.auto_graph;
+
+    final actions = <Widget>[
       if (isLandsCape)
-        _getIconButton(_showChart ? Icons.list_alt_sharp : Icons.auto_graph,
-            () {
+        _getIconButton(_showChart ? iconList : chartList, () {
           setState(() {
             _showChart = !_showChart;
           });
@@ -133,37 +137,39 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar.preferredSize.height -
         mediaQuery.padding.top;
 
-    final bodyPage = SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // if (isLandsCape)
-          //   Row(
-          //     mainAxisAlignment: MainAxisAlignment.center,
-          //     children: [
-          //       const Text('Exibir Gráfico'),
-          //       Switch.adaptive(
-          //         activeColor: Theme.of(context).colorScheme.secondary,
-          //         value: _showChart,
-          //         onChanged: (value) {
-          //           setState(() {
-          //             _showChart = value;
-          //           });
-          //         },
-          //       ),
-          //     ],
-          //   ),
-          if (_showChart || !isLandsCape)
-            SizedBox(
-              height: availableHight * (isLandsCape ? 0.8 : 0.30),
-              child: Chart(_recentTransactions),
-            ),
-          if (!_showChart || isLandsCape)
-            SizedBox(
-              height: availableHight * (isLandsCape ? 1 : 0.7),
-              child: TransactionList(_transactions, _removeTransaction),
-            ),
-        ],
+    final bodyPage = SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // if (isLandsCape)
+            //   Row(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       const Text('Exibir Gráfico'),
+            //       Switch.adaptive(
+            //         activeColor: Theme.of(context).colorScheme.secondary,
+            //         value: _showChart,
+            //         onChanged: (value) {
+            //           setState(() {
+            //             _showChart = value;
+            //           });
+            //         },
+            //       ),
+            //     ],
+            //   ),
+            if (_showChart || !isLandsCape)
+              SizedBox(
+                height: availableHight * (isLandsCape ? 0.8 : 0.30),
+                child: Chart(_recentTransactions),
+              ),
+            if (!_showChart || isLandsCape)
+              SizedBox(
+                height: availableHight * (isLandsCape ? 1 : 0.7),
+                child: TransactionList(_transactions, _removeTransaction),
+              ),
+          ],
+        ),
       ),
     );
 
