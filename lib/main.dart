@@ -179,6 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
               middle: const Text('Despesas Pessoais'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
+                children: actions,
               ),
             ),
             child: bodyPage,
