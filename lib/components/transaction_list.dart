@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import 'transaction_item.dart';
 
-class TransactionList extends StatelessWidget {
+class TransactionList extends StatefulWidget {
   final List<Transaction> transactions;
   final void Function(String) onRemove;
 
@@ -11,8 +11,13 @@ class TransactionList extends StatelessWidget {
       : super(key: key);
 
   @override
+  State<TransactionList> createState() => _TransactionListState();
+}
+
+class _TransactionListState extends State<TransactionList> {
+  @override
   Widget build(BuildContext context) {
-    return transactions.isEmpty
+    return widget.transactions.isEmpty
         ? LayoutBuilder(
             builder: (ctx, constraints) {
               return Column(
@@ -39,14 +44,24 @@ class TransactionList extends StatelessWidget {
             },
           )
         : ListView.builder(
-            itemCount: transactions.length,
+            itemCount: widget.transactions.length,
             itemBuilder: (ctx, index) {
-              final tr = transactions[index];
+              final tr = widget.transactions[index];
               return TransactionItem(
+                key: GlobalObjectKey(tr),
                 tr: tr,
-                onRemove: onRemove,
+                onRemove: widget.onRemove,
               );
             },
           );
+    // ListView(
+    //     children: widget.transactions.map((tr) {
+    //       return TransactionItem(
+    //         key: ValueKey(tr.id),
+    //         tr: tr,
+    //         onRemove: widget.onRemove,
+    //       );
+    //     }).toList(),
+    //   );
   }
 }
